@@ -4,39 +4,34 @@ import axios from 'axios';
 import Divider from '@mui/material/Divider';
 import Song from '../components/song';
 import '../index.css';
+import {useSelector} from 'react-redux';
+import {getAllSongs} from '../api/song';
 
 function Home() {
-	const User=window.localStorage.getItem("user");
-	const [topViewed, setTopViewed] = useState([]);
-	const [topLiked, setTopLiked] = useState([]);
-	useEffect(() => {
-		axios.get( "http://localhost:4000/api/song/getbyviews/",
-			).then((res) => {
-				setTopViewed(res.data.data);
-			})
-			.catch((err) => {
-					console.log(err.response.data.message);
-			});
-		axios.get( "http://localhost:4000/api/song/getbylikes/",
-			).then((res) => {
-				setTopLiked(res.data.data);
-			})
-			.catch((err) => {
-				console.log(err.response.data.message);
-			});
-	},[])
+  const [topViewed, setTopViewed] = useState([]);
+  const [topLiked, setTopLiked] = useState([]);
+  useEffect(() => {
+    getAllSongs('views', 5).then(res => {
+      setTopViewed(res.data);
+    });
+    getAllSongs('likes', 5).then(res => {
+      setTopLiked(res.data);
+    });
+  }, []);
   return (
-    <div className='bg-primary h-screen overflow-auto'>
-	  <div className="font-link">
-      <Homenavbar user={User} role={window.localStorage.getItem("role")}/>
-	  Top Viewed:<br/>
-	  <Song pageData={topViewed} user={User}/>
-	  <Divider/>
-	  Top Liked:<br/>
-	  <Song pageData={topLiked} user={User}/>
-	  </div>
+    <div className="bg-primary h-screen overflow-auto">
+      <div className="font-link">
+        <Homenavbar />
+        Top Viewed:
+        <br />
+        <Song pageData={topViewed} />
+        <Divider />
+        Top Liked:
+        <br />
+        <Song pageData={topLiked} />
+      </div>
     </div>
-  )
+  );
 }
 
-export default Home
+export default Home;
