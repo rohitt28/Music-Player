@@ -1,92 +1,46 @@
-import {React, useState, useEffect} from 'react';
+import {React, useEffect, useState} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
-import Drawer from '@mui/material/Drawer';
-import IconButton from '@mui/material/IconButton';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
+import {
+  AppBar,
+  Box,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Toolbar,
+  Typography,
+  Button,
+  Menu,
+  Avatar,
+  MenuItem,
+  Grid,
+} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Menu from '@mui/material/Menu';
-import Avatar from '@mui/material/Avatar';
-import MenuItem from '@mui/material/MenuItem';
-import SearchIcon from '@mui/icons-material/Search';
-import {styled, alpha} from '@mui/material/styles';
-import InputBase from '@mui/material/InputBase';
-import Grid from '@mui/material/Grid';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import axios from 'axios';
-import Song from './song';
-import Artist from './artist';
-import {useSelector} from 'react-redux';
-
-const Search = styled('div')(({theme}) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(1),
-    width: 'auto',
-  },
-}));
-
-const SearchIconWrapper = styled('div')(({theme}) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
-
-const StyledInputBase = styled(InputBase)(({theme}) => ({
-  color: 'inherit',
-  width: '100%',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      width: '30ch',
-      '&:focus': {
-        width: '30ch',
-      },
-    },
-  },
-}));
-
+import {useSelector, useDispatch} from 'react-redux';
+import {logoutUser} from '../api/user';
+import SearchBar from './SearchBar';
+import {navItems, userSettings, adminSettings} from '../utils/navigation';
 const drawerWidth = 240;
-const navItems = [
-  ['Home', '/'],
-  ['All Songs', '/song'],
-  ['Artists', '/artist'],
-];
-var settings = ['Account Details', 'Liked Songs', 'Dashboard', 'Logout'];
 
 function Navbar(props) {
   const {window} = props;
+  const [settings, setSettings] = useState(userSettings);
+  const navigate = useNavigate();
+
   const User = useSelector(state => state.auth.user);
   const isAdmin = useSelector(state => state.auth.isAdmin);
-  if (!isAdmin) {
-    settings = ['Account Details', 'Liked Songs', 'Logout'];
-  }
-  const ActivePage = props.activePage;
+  useEffect(() => {
+    if (!isAdmin) {
+      setSettings(userSettings);
+    } else {
+      setSettings(adminSettings);
+    }
+  }, [isAdmin]);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [pagedata, setpagedata] = useState('');
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -95,51 +49,15 @@ function Navbar(props) {
   const handleOpenUserMenu = event => {
     setAnchorElUser(event.currentTarget);
   };
-  const navigate = useNavigate();
-  const handleCloseUserMenu = page => {
+  const handleCloseUserMenu = (name, path) => {
     setAnchorElUser(null);
-    if (page) {
-      if (page['setting'] === 'Logout') {
-        navigate('/login', {
-          replace: true,
+    if (name) {
+      if (name === 'Logout') {
+        logoutUser().then(res => {
+          console.log(res);
         });
       }
-      if (page['setting'] === 'Dashboard') {
-        navigate('/admin', {
-          replace: true,
-        });
-      }
-      if (page['setting'] === 'Account Details') {
-        navigate('/user', {
-          replace: false,
-        });
-      }
-      if (page['setting'] === 'Liked Songs') {
-        navigate('/liked', {
-          replace: false,
-        });
-      }
-    }
-  };
-  var check = 'name';
-
-  const searchdata = event => {
-    var str = event.target.value;
-    if (str) {
-      let temp;
-      temp = pagedata.filter(item => {
-        return item[check].toLowerCase().includes(str.toLowerCase());
-      });
-      setpagedata(temp);
-    } else {
-      axios
-        .get('http://localhost:4000/api/' + data + '/get/')
-        .then(res => {
-          setpagedata(res.data.data);
-        })
-        .catch(err => {
-          console.log(err.response.data.message);
-        });
+      navigate(path, {replace: true});
     }
   };
 
@@ -166,14 +84,16 @@ function Navbar(props) {
         open={Boolean(anchorElUser)}
         onClose={handleCloseUserMenu}>
         {settings.map(setting => (
-          <MenuItem key={setting} onClick={e => handleCloseUserMenu({setting})}>
-            <Typography textAlign="center">{setting}</Typography>
+          <MenuItem
+            key={setting.name}
+            onClick={e => handleCloseUserMenu(setting.name, setting.path)}>
+            <Typography textAlign="center">{setting.name}</Typography>
           </MenuItem>
         ))}
       </Menu>
     </>
   );
-  if (User === 'null') {
+  if (!User) {
     tmpbutton = (
       <Link to="/login">
         <Button sx={{color: '#fff'}}>Login</Button>
@@ -187,11 +107,11 @@ function Navbar(props) {
       </Typography>
       <Divider />
       <List>
-        {navItems.map(([item, item1]) => (
-          <ListItem key={item} disablePadding>
-            <Link to={item1}>
+        {navItems.map(({name, path}) => (
+          <ListItem key={(name, path)} disablePadding>
+            <Link to={path}>
               <ListItemButton sx={{textAlign: 'center'}}>
-                <ListItemText primary={item} />
+                <ListItemText primary={name} />
               </ListItemButton>
             </Link>
           </ListItem>
@@ -201,26 +121,6 @@ function Navbar(props) {
   );
   const container =
     window !== undefined ? () => window().document.body : undefined;
-  var Body;
-  var data = 'song';
-  if (ActivePage === 'artists') {
-    data = 'artist';
-  }
-  useEffect(() => {
-    axios
-      .get('http://localhost:4000/api/' + data + '/get/')
-      .then(res => {
-        setpagedata(res.data.data);
-      })
-      .catch(err => {
-        console.log(err.response.data.message);
-      });
-  }, []);
-  if (ActivePage === 'songs') {
-    Body = <Song pageData={pagedata} user={User} />;
-  } else if (ActivePage === 'artists') {
-    Body = <Artist pageData={pagedata} />;
-  }
   return (
     <>
       <Box sx={{display: 'flex', height: '10vh'}}>
@@ -249,26 +149,19 @@ function Navbar(props) {
               <Grid item md={3}>
                 <Box
                   sx={{display: {xs: 'none', sm: 'block', alignItems: 'left'}}}>
-                  {navItems.map(([item, item1]) => (
-                    <Link to={item1}>
-                      <Button key={item} sx={{color: '#fff'}}>
-                        {item}
+                  {navItems.map(({name, path}) => (
+                    <Link to={path}>
+                      <Button key={(name, path)} sx={{color: '#fff'}}>
+                        <Typography color={'white'} fontSize={'1em'}>
+                          {name}
+                        </Typography>
                       </Button>
                     </Link>
                   ))}
                 </Box>
               </Grid>
               <Grid item xs={7} md={6}>
-                <Search>
-                  <SearchIconWrapper>
-                    <SearchIcon />
-                  </SearchIconWrapper>
-                  <StyledInputBase
-                    placeholder="Search…"
-                    inputProps={{'aria-label': 'search'}}
-                    onInput={searchdata}
-                  />
-                </Search>
+                <SearchBar />
               </Grid>
               <Grid item xs={2}>
                 <Box
@@ -303,7 +196,6 @@ function Navbar(props) {
         </Box>
       </Box>
       <br />
-      {Body}
     </>
   );
 }

@@ -1,10 +1,7 @@
 import {React, useState, useEffect} from 'react';
-import Homenavbar from '../components/homenavbar';
-import axios from 'axios';
-import Divider from '@mui/material/Divider';
+import Homenavbar from '../components/Navbar';
+import {Divider, Box, Typography} from '@mui/material';
 import Song from '../components/song';
-import '../index.css';
-import {useSelector} from 'react-redux';
 import {getAllSongs} from '../api/song';
 
 function Home() {
@@ -19,18 +16,17 @@ function Home() {
     });
   }, []);
   return (
-    <div className="bg-primary h-screen overflow-auto">
-      <div className="font-link">
-        <Homenavbar />
-        Top Viewed:
-        <br />
-        <Song pageData={topViewed} />
-        <Divider />
-        Top Liked:
-        <br />
-        <Song pageData={topLiked} />
-      </div>
-    </div>
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center">
+      <Typography variant="h5">Top Viewed:</Typography>
+      <Song pageData={topViewed} />
+      <Divider />
+      <Typography variant="h5">Top Liked:</Typography>
+      <Song pageData={topLiked} />
+    </Box>
   );
 }
 

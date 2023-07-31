@@ -1,9 +1,0 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-.font-link {
-    font-family: 'Zen Dots', cursive;
-    font-size: 20px;
-    text-align: center;
-  }
-  

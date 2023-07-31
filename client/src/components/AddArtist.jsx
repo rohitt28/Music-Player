@@ -1,11 +1,9 @@
 import {React} from 'react';
-import axios from 'axios';
 import TextField from '@mui/joy/TextField';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import {useNavigate} from 'react-router-dom';
 import {addArtist} from '../api/artist';
-
 function AddArtist() {
   const navigate = useNavigate();
   function add(event) {

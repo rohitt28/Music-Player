@@ -77,6 +77,7 @@ export const updateUser = async (userId, data) => {
     const res = api.put(`api/user/update/${userId}`, {
       ...data,
     });
+    console.log(res);
     return res;
   } catch (error) {
     return error;

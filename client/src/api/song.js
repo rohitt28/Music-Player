@@ -37,3 +37,12 @@ export const updateSong = async (songId, data) => {
     return error;
   }
 };
+
+export const deleteSong = async songId => {
+  try {
+    const res = api.delete(`api/song/delete/${songId}`);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};

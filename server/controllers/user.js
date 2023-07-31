@@ -190,6 +190,7 @@ getCurrentUser = async (req, res) => {
 
 module.exports = {
   loginUser,
+  logoutUser,
   createUser,
   updateUser,
   deleteUser,

@@ -1,7 +1,6 @@
 import React from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/joy/TextField';
-import axios from 'axios';
 import {updateArtist} from '../api/artist';
 
 function EditArtist(props) {

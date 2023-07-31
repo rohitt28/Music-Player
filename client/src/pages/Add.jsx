@@ -1,7 +1,6 @@
 import React from 'react';
 import AddArtist from '../components/AddArtist';
 import AddSong from '../components/AddSong';
-import Homenavbar from '../components/homenavbar';
 import {useNavigate} from 'react-router-dom';
 import {useSelector} from 'react-redux';
 
@@ -16,10 +15,9 @@ function Add() {
     pagedata = <AddSong />;
   }
   return (
-    <div className="bg-primary w-screen h-screen">
-      <Homenavbar />
+    <>
       {pagedata}
-    </div>
+    </>
   );
 }
 

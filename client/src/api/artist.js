@@ -7,7 +7,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-export const getAllArtists = async userId => {
+export const getAllArtists = async () => {
   try {
     const res = await api.get(`api/artist/get`);
     return res.data;
@@ -27,20 +27,20 @@ export const addArtist = async data => {
   }
 };
 
-export const deleteArtist = async artistId => {
+export const updateArtist = async (artistId, data) => {
   try {
-    const res = api.delete(`api/artist/delete/${artistId}`);
+    const res = await api.put(`api/artist/update/${artistId}`, {
+      ...data,
+    });
     return res;
   } catch (error) {
     return error;
   }
 };
 
-export const updateArtist = async (artistId, data) => {
+export const deleteArtist = async artistId => {
   try {
-    const res = await api.put(`api/artist/update/${artistId}`, {
-      ...data,
-    });
+    const res = api.delete(`api/artist/delete/${artistId}`);
     return res;
   } catch (error) {
     return error;

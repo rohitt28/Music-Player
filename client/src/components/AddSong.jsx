@@ -1,14 +1,15 @@
 import {React, useState} from 'react';
-import axios from 'axios';
 import TextField from '@mui/joy/TextField';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputLabel from '@mui/material/InputLabel';
-import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
+import {
+  OutlinedInput,
+  InputLabel,
+  Button,
+  MenuItem,
+  Select,
+  Container,
+} from '@mui/material';
 import {useTheme} from '@mui/material/styles';
-import Select from '@mui/material/Select';
 import {useNavigate} from 'react-router-dom';
-import Container from '@mui/material/Container';
 import {getAllArtists} from '../api/artist';
 import {addSong} from '../api/song';
 

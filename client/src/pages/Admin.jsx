@@ -1,52 +1,45 @@
 import {React, useState, useEffect} from 'react';
-import {DataGrid, gridColumnsTotalWidthSelector} from '@mui/x-data-grid';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import axios from 'axios';
-import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
+import {DataGrid} from '@mui/x-data-grid';
+import {
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  Grid,
+  Button,
+  Box,
+  Modal,
+  Typography,
+  Container,
+} from '@mui/material';
+import {Edit, Delete, Close} from '@mui/icons-material';
 import EditArtist from '../components/editArtist';
 import EditSong from '../components/editSong';
-import CloseIcon from '@mui/icons-material/Close';
-import Homenavbar from '../components/homenavbar';
 import {useNavigate} from 'react-router-dom';
-import {Typography} from '@mui/material';
-import {Container} from '@mui/material';
 import {useSelector} from 'react-redux';
 import {deleteArtist, getAllArtists} from '../api/artist';
-import {getAllSongs} from '../api/song';
-
-var columns;
-var rows;
+import {deleteSong, getAllSongs} from '../api/song';
+import {getColumns} from '../utils/gridConfigs';
 
 export default function Admin() {
   const [value, setValue] = useState('artist');
-  const [artistdata, setartistdata] = useState('');
-  const [songdata, setsongdata] = useState('');
+  const [artistdata, setartistdata] = useState([]);
+  const [songdata, setsongdata] = useState([]);
+  const [editData, setEditData] = useState('');
   const [currEdit, seteditdata] = useState('');
   const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  var rowdata = [];
-  var editdata = <EditArtist data={currEdit} />;
+  const columns = getColumns(change, del);
+  const [rows, setRows] = useState([]);
+  const [element, setElement] = useState(<></>);
   const isAdmin = useSelector(state => state.auth.isAdmin);
   const navigate = useNavigate();
   if (!isAdmin) {
     navigate('/', {replace: true});
   }
-
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
   const handleChange = event => {
     setValue(event.target.value);
-    setdata();
-  };
-  var style1 = {
-    height: 400,
   };
   function change(event) {
     handleOpen();
@@ -57,14 +50,9 @@ export default function Admin() {
       return;
     }
     if (value === 'song') {
-      axios
-        .delete('http://localhost:4000/api/song/delete/' + event)
-        .then(res => {
-          console.log(res.data);
-        })
-        .catch(err => {
-          console.log(err.response.data.message);
-        });
+      deleteSong(event).then(res => {
+        console.log(res.data);
+      });
     } else {
       let flag = true;
       for (let i = 0; i < songdata.length; i++) {
@@ -107,89 +95,41 @@ export default function Admin() {
     boxShadow: 24,
     p: 1,
   };
-  const setdata = () => {
+
+  useEffect(() => {
+    var rowdata = [];
     if (value === 'artist') {
-      columns = [
-        {field: 'id', headerName: 'ID', width: 70},
-        {field: 'name', headerName: 'Name', width: 130},
-        {
-          field: 'imageURL',
-          headerName: 'Image',
-          width: 70,
-          renderCell: params => <img alt="artist" src={params.value} />,
-        },
-        {
-          field: 'action',
-          headerName: 'Action',
-          width: 130,
-          renderCell: params => (
-            <>
-              <Button onClick={e => change(params.value)}>
-                <EditIcon />
-              </Button>
-              <Button onClick={e => del(params.value)}>
-                <DeleteIcon />
-              </Button>
-            </>
-          ),
-        },
-      ];
       rowdata = artistdata;
-      editdata = <EditArtist data={currEdit} />;
+      setEditData(<EditArtist data={currEdit} />);
     } else {
-      columns = [
-        {field: 'id', headerName: 'ID', width: 70},
-        {field: 'name', headerName: 'Name', width: 130},
-        {
-          field: 'imageURL',
-          headerName: 'Image',
-          width: 70,
-          renderCell: params => <img alt="song" src={params.value} />,
-        },
-        {
-          field: 'action',
-          headerName: 'Action',
-          width: 160,
-          renderCell: params => (
-            <>
-              <Button onClick={e => change(params.value)}>
-                <EditIcon />
-              </Button>
-              <Button onClick={e => del(params.value)}>
-                <DeleteIcon />
-              </Button>
-            </>
-          ),
-        },
-      ];
       rowdata = songdata;
-      editdata = <EditSong data={currEdit} />;
+      setEditData(<EditSong data={currEdit} />);
     }
-    rows = [];
+    const tmpRows = [];
     for (let i = 0; i < rowdata.length; i++) {
       rowdata[i]['id'] = i + 1;
       rowdata[i]['action'] = rowdata[i]['_id'];
     }
     if (rowdata) {
-      rowdata.map(item => rows.push(item));
+      rowdata.map(item => tmpRows.push(item));
     }
-  };
-  setdata();
-  var element = <></>;
-  if (columns) {
-    element = (
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        pageSize={5}
-        rowsPerPageOptions={[5]}
-        sx={style1}
-      />
-    );
-  }
+    setRows(tmpRows);
+  }, [artistdata, currEdit, songdata, value]);
+  useEffect(() => {
+    if (columns && rows) {
+      setElement(
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          pageSize={5}
+          rowsPerPageOptions={[5]}
+          sx={{height: 400}}
+        />,
+      );
+    }
+  }, [rows, columns]);
   return (
-    <div className="bg-primary w-screen h-screen">
-      <Homenavbar />
+    <>
       <Container maxWidth="sm">
         <Grid container spacing={2}>
           <Grid item xs={6}>
@@ -234,13 +174,13 @@ export default function Admin() {
             </Box>
             <Box>
               <Button onClick={handleClose}>
-                <CloseIcon />
+                <Close />
               </Button>
             </Box>
           </Box>
-          {editdata}
+          {editData}
         </Box>
       </Modal>
-    </div>
+    </>
   );
 }

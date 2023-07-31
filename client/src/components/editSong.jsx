@@ -1,5 +1,4 @@
 import {React, useState} from 'react';
-import axios from 'axios';
 import TextField from '@mui/joy/TextField';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';
@@ -8,6 +7,7 @@ import MenuItem from '@mui/material/MenuItem';
 import {useTheme} from '@mui/material/styles';
 import Select from '@mui/material/Select';
 import {updateSong} from '../api/song';
+import {getAllArtists} from '../api/artist';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -34,14 +34,9 @@ function EditSong(props) {
   const theme = useTheme();
   const [artistName, setArtistName] = useState([]);
   const [pagedata, setpagedata] = useState([]);
-  axios
-    .get('http://localhost:4000/api/artist/get/')
-    .then(res => {
-      setpagedata(res.data.data);
-    })
-    .catch(err => {
-      console.log(err.response.data.message);
-    });
+  getAllArtists().then(res => {
+    setpagedata(res.data);
+  });
   const handleChange = event => {
     const {
       target: {value},

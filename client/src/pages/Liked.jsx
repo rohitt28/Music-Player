@@ -1,8 +1,6 @@
 import {React, useState, useEffect} from 'react';
-import Homenavbar from '../components/homenavbar';
-import axios from 'axios';
+import Homenavbar from '../components/Navbar';
 import Song from '../components/song';
-import '../index.css';
 import {useNavigate} from 'react-router-dom';
 import {useSelector} from 'react-redux';
 import {getUserById} from '../api/user';
@@ -12,14 +10,14 @@ function Liked() {
   const User = useSelector(state => state.auth.user);
   console.log(User);
   const navigate = useNavigate();
-  if (!User || User === 'null') {
+  if (!User) {
     navigate('/', {replace: true});
   }
   const [userLiked, setuserLiked] = useState([]);
   const [songdata, setsongdata] = useState([]);
-  var pagedata = [];
+  const [data, setData] = useState([]);
   useEffect(() => {
-    getUserById().then(res => {
+    getUserById(User).then(res => {
       setuserLiked(res.data.favourites);
     });
     getAllSongs().then(res => {
@@ -27,6 +25,8 @@ function Liked() {
     });
   }, []);
   useEffect(() => {
+    var pagedata = [];
+
     for (let i = 0; i < songdata.length; i++) {
       for (let j = 0; j < userLiked.length; j++) {
         if (songdata[i]._id === userLiked[j]._id) {
@@ -34,12 +34,13 @@ function Liked() {
         }
       }
     }
+    console.log(pagedata);
+    setData(pagedata);
   }, [songdata, userLiked]);
   return (
-    <div className="bg-primary w-screen h-screen">
-      <Homenavbar />
-      <Song pageData={pagedata} />
-    </div>
+    <>
+      <Song pageData={data} />
+    </>
   );
 }
 

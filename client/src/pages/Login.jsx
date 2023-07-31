@@ -19,7 +19,6 @@ function Login() {
         dispatch(loginSuccess({...res, attempt: 'success'}));
         console.log({...res, attempt: 'success'});
         navigate('/');
-        console.log(...res);
       }
     } catch (err) {
       if (err.message === 'Unauthorized') {

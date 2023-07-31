@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import React, {useEffect} from 'react';
+import {Route, Routes} from 'react-router-dom';
 import {
   Login,
   Home,
@@ -11,33 +11,38 @@ import {
   Add,
   Liked,
 } from './pages';
-import { loginUser } from './api/user';
-import { loginFail, loginSuccess } from './store/reducers/authReducer';
-import { useDispatch } from 'react-redux';
+import {loginUser} from './api/user';
+import {loginFail, loginSuccess} from './store/reducers/authReducer';
+import {useDispatch} from 'react-redux';
+import Navbar from './components/Navbar';
 
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
-    loginUser().then((res) => {
-      console.log(res, 'txt');
-      dispatch(loginSuccess(res));
-    });
-  }, []);
+    loginUser()
+      .then(res => {
+        dispatch(loginSuccess(res));
+      })
+      .catch(err => {
+        dispatch(loginFail());
+      });
+  }, [dispatch]);
 
   return (
-    <div className='bg-primary w-screen h-screen flex justify-center items-center'>
+    <>
+      <Navbar />
       <Routes>
-        <Route path='/login' element={<Login />} />
-        <Route path='/signup' element={<Signup />} />
-        <Route path='/user' element={<User />} />
-        <Route path='/song' element={<Song />} />
-        <Route path='/artist' element={<Artist />} />
-        <Route path='/admin' element={<Admin />} />
-        <Route path='/add' element={<Add />} />
-        <Route path='/liked' element={<Liked />} />
-        <Route path='/*' element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/user" element={<User />} />
+        <Route path="/song" element={<Song />} />
+        <Route path="/artist" element={<Artist />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/add" element={<Add />} />
+        <Route path="/liked" element={<Liked />} />
+        <Route path="/*" element={<Home />} />
       </Routes>
-    </div>
+    </>
   );
 }
 

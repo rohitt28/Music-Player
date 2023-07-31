@@ -1,13 +1,10 @@
-import {React, useState, forwardRef} from 'react';
-import axios from 'axios';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Modal from '@mui/material/Modal';
+import {React, useState, forwardRef, useEffect} from 'react';
+import {Grid, Box, Button, Modal, Snackbar} from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
 import {useSelector} from 'react-redux';
+import {getUserById, updateUser} from '../api/user';
+import {updateSong} from '../api/song';
 
 function Song(props) {
   const [open, setOpen] = useState(false);
@@ -21,7 +18,8 @@ function Song(props) {
   var enableLike;
   const songdata = props.pageData;
   const User = useSelector(state => state.auth.user);
-  if (!User || User === 'null') {
+  const [userData, setUserData] = useState([]);
+  if (!User) {
     enableLike = false;
   } else {
     enableLike = true;
@@ -29,55 +27,52 @@ function Song(props) {
   const Alert = forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   });
+  useEffect(() => {
+    if (User) {
+      getUserById(User).then(res => {
+        setUserData(res.data.favourites);
+      });
+    }
+  }, [User]);
+  useEffect(() => {
+    var flag = false;
+    userData.forEach(val => {
+      console.log(val._id, songId);
+      if (val._id === songId) {
+        console.log('b');
+        flag = true;
+      }
+    });
+    if (flag) {
+      setSongLike(true);
+      setvariant('contained');
+    } else {
+      setSongLike(false);
+      setvariant('outlined');
+    }
+  }, [userData, songId]);
+
   const alertClick = () => {
     setOpenalert(true);
     console.log(songLike);
     if (songLike) {
       setSongLike(false);
       setMsg('Removed from Favorites.');
-      axios
-        .put('http://localhost:4000/api/song/update/' + songId, {
-          dislike: true,
-        })
-        .then(res => {
-          console.log(res);
-        })
-        .catch(err => {
-          console.log(err.response.data.message);
-        });
-      axios
-        .put('http://localhost:4000/api/user/update/' + User, {
-          removefavourite: songId,
-        })
-        .then(res => {
-          console.log(res);
-        })
-        .catch(err => {
-          console.log(err.response.data.message);
-        });
+      updateSong(songId, {dislike: true}).then(res => {
+        console.log(res);
+      });
+      updateUser(User, {removefavourite: songId}).then(res => {
+        console.log(res);
+      });
     } else {
       setSongLike(true);
       setMsg('Added to Favorites.');
-      axios
-        .put('http://localhost:4000/api/song/update/' + songId, {
-          like: true,
-        })
-        .then(res => {
-          console.log(res);
-        })
-        .catch(err => {
-          console.log(err.response.data.message);
-        });
-      axios
-        .put('http://localhost:4000/api/user/update/' + User, {
-          addfavourite: songId,
-        })
-        .then(res => {
-          console.log(res);
-        })
-        .catch(err => {
-          console.log(err.response.data.message);
-        });
+      updateSong(songId, {like: true}).then(res => {
+        console.log(res);
+      });
+      updateUser(User, {addfavourite: songId}).then(res => {
+        console.log(res);
+      });
     }
   };
   const alertClose = (event, reason) => {
@@ -90,70 +85,53 @@ function Song(props) {
     position: 'absolute',
     bottom: '0%',
     width: '100%',
-    backgroundColor: 'black',
     textAlign: 'center',
-  };
-  const test = tmp => {
-    axios
-      .get('http://localhost:4000/api/user/get/' + User)
-      .then(res => {
-        setUserLike(res.data.data.favourites);
-        var qry = res.data.data.favourites.find(element => element._id === tmp);
-        if (qry) {
-          setSongLike(true);
-          setvariant('contained');
-        } else {
-          setSongLike(false);
-          setvariant('outlined');
-        }
-      })
-      .catch(err => {
-        console.log(err.response.data.message);
-      });
   };
   const handleOpen = (song, id) => {
     setOpen(true);
     setSong(song);
     setSongId(id);
-    axios
-      .put('http://localhost:4000/api/song/update/' + id, {
-        view: true,
-      })
-      .then(res => {
-        test(id);
-      })
-      .catch(err => {
-        console.log(err.response.data.message);
-      });
+    updateSong(id, {view: true}).then(res => {
+      console.log(res);
+    });
   };
   const handleClose = () => {
     setOpen(false);
     setSong('');
   };
   return (
-    <>
-      <div>
-        <span className="font-link">
-          <Grid id="tmp" container spacing={1} className="justify-center">
-            {songdata.length > 0 &&
-              songdata.map(room => (
-                <Grid
-                  item
-                  key={room['_id']}
-                  xs={4}
-                  md={2}
-                  style={{textAlign: 'center'}}>
-                  <Button
-                    onClick={e => handleOpen(room['songURL'], room['_id'])}>
-                    <img alt="song" src={room['imageURL']} />
-                  </Button>
-                  <br />
-                  {room['name']}
-                </Grid>
-              ))}
-          </Grid>
-        </span>
-      </div>
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center">
+      <Grid
+        container
+        spacing={2}
+        style={{padding: '3% 8%'}}
+        justifyContent="center"
+        alignItems="center">
+        {songdata.length > 0 &&
+          songdata.map(val => (
+            <Grid
+              item
+              key={val['_id']}
+              xs={4}
+              md={2}
+              style={{textAlign: 'center'}}>
+              <Button onClick={e => handleOpen(val['songURL'], val['_id'])}>
+                <img
+                  alt="song"
+                  src={val['imageURL']}
+                  style={{width: '100%', borderRadius: '5px'}}
+                />
+              </Button>
+              <br />
+              {val['name']}
+            </Grid>
+          ))}
+      </Grid>
+
       <Modal
         open={open}
         onClose={handleClose}
@@ -198,7 +176,7 @@ function Song(props) {
           {msg}
         </Alert>
       </Snackbar>
-    </>
+    </Box>
   );
 }
 
