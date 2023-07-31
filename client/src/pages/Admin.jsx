@@ -127,7 +127,7 @@ export default function Admin() {
         />,
       );
     }
-  }, [rows, columns]);
+  }, [rows]);
   return (
     <>
       <Container maxWidth="sm">
